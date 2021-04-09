@@ -12,6 +12,7 @@ var lastDownTarget, canvas;
 let mode = 0;
 let shading = 0;
 let currsel=2;
+let illu = 1;
 let meshdiana;
 let meshmonkey;
 let meshamongus;
@@ -218,6 +219,42 @@ window.onload = function() {
                     drawAll(jsondiana,jsonmonkey,jsonamongus);
                 }
                 break;
+            case "i":
+            console.log("i is pressed");
+            illu = (illu+1)%2;
+            if(illu==0){
+                if(currsel==3){
+                    jsonmonkey.illu=false;
+                document.getElementById("p6").innerHTML = "illuumination Mode - <b>ON</b>";
+                }
+                if(currsel==4){
+                    jsondiana.illu=false;
+                    document.getElementById("p6").innerHTML = "illuumination Mode - <b>ON</b>";
+                }
+                if(currsel==5){
+                    jsonamongus.illu=false;
+                    document.getElementById("p6").innerHTML = "illuumination Mode - <b>ON</b>";
+                }
+                drawAll(jsondiana,jsonmonkey,jsonamongus);
+                
+            }
+            else{
+                
+                if(currsel==3){
+                    jsonmonkey.illu=true;
+                    document.getElementById("p6").innerHTML = " illuumination Mode - <b>OFF</b> ";
+                }
+                if(currsel==4){
+                    jsondiana.illu=true;
+                    document.getElementById("p6").innerHTML = " illuumination Mode - <b>OFF</b> ";
+                }
+                if(currsel==5){
+                    jsonamongus.illu=true;
+                    document.getElementById("p6").innerHTML = " illuumination Mode - <b>OFF</b>  ";
+                }
+                drawAll(jsondiana,jsonmonkey,jsonamongus);
+            }
+            break;
             case "+":
                 if(mode==1) {
                     //scale(currentSel,0.1);
@@ -379,7 +416,98 @@ window.onload = function() {
                 currsel=5;
                 document.getElementById("p5").innerHTML = "Current mesh id is <b>5</b> (AmongUs)";
                 break;
-            default:
+            case "ArrowRight":
+                console.log("Arrow pressed");
+                if(mode==1) {
+
+                    if(currsel==3){
+                        jsonmonkey.lightpos.x -= 5;
+                        drawAll(jsondiana,jsonmonkey,jsonamongus); 
+                        
+    
+                    }
+                    if(currsel==4){
+                    jsondiana.lightpos.x -= 5;
+                    drawAll(jsondiana,jsonmonkey,jsonamongus);  
+    
+                    }
+                    if(currsel==5){
+                        jsonamongus.lightpos.x -= 5;
+                        drawAll(jsondiana,jsonmonkey,jsonamongus); 
+                    }
+                    
+                }
+                break;
+                case "ArrowLeft":
+                    console.log("Arrow pressed");
+                    if(mode==1) {
+    
+                        if(currsel==3){
+                            jsonmonkey.lightpos.x += 5;
+                            drawAll(jsondiana,jsonmonkey,jsonamongus); 
+                            
+        
+                        }
+                        if(currsel==4){
+                        jsondiana.lightpos.x += 5;
+                        drawAll(jsondiana,jsonmonkey,jsonamongus);  
+        
+                        }
+                        if(currsel==5){
+                            jsonamongus.lightpos.x += 5;
+                            drawAll(jsondiana,jsonmonkey,jsonamongus); 
+                        }
+                        
+                    }
+                    break;
+                case "ArrowUp":
+                    console.log("Arrow pressed");
+                    if(mode==1) {
+    
+                        if(currsel==3){
+                            jsonmonkey.lightpos.y += 5;
+                            drawAll(jsondiana,jsonmonkey,jsonamongus); 
+                            
+        
+                        }
+                        if(currsel==4){
+                        jsondiana.lightpos.y += 5;
+                        drawAll(jsondiana,jsonmonkey,jsonamongus);  
+        
+                        }
+                        if(currsel==5){
+                            jsonamongus.lightpos.y += 5;
+                            drawAll(jsondiana,jsonmonkey,jsonamongus); 
+                        }
+                        
+                    }
+                    break;
+                case "ArrowDown":
+                    console.log("Arrow pressed");
+                    if(mode==1) {
+    
+                        if(currsel==3){
+                            jsonmonkey.lightpos.y -= 5;
+                            drawAll(jsondiana,jsonmonkey,jsonamongus); 
+                            
+        
+                        }
+                        if(currsel==4){
+                        jsondiana.lightpos.y -= 5;
+                        drawAll(jsondiana,jsonmonkey,jsonamongus);  
+        
+                        }
+                        if(currsel==5){
+                            jsonamongus.lightpos.y -= 5;
+                            drawAll(jsondiana,jsonmonkey,jsonamongus); 
+                        }
+                        
+                    }
+                    break;
+                
+            
+
+                default:
                 console.log("kuch bhi");
 
         }
@@ -813,8 +941,19 @@ else{
 
     gl.uniform1f(shininessLocation, shininess);
     gl.uniform1f(ka, jsondiana.coff.ka);
-    gl.uniform1f(kd, jsondiana.coff.kd);
-    gl.uniform1f(ks, jsondiana.coff.ks);
+    
+    if(jsondiana.illu==undefined){
+        jsondiana.illu=true;
+    }
+    if(jsondiana.illu){
+        gl.uniform1f(ks, jsondiana.coff.ks);
+        gl.uniform1f(kd, jsondiana.coff.kd);
+    }
+    else{
+        gl.uniform1f(ks, 0);
+        gl.uniform1f(kd, 0);
+    }
+    
 
     
 
