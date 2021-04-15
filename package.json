@@ -10,11 +10,12 @@
 	"author": "AT",
 	"license": "ISC",
 	"devDependencies": {
-		"browser-sync": "^2.26.13",
+		"browser-sync": "^2.26.14",
 		"gulp": "^4.0.2",
 		"http-server": "^0.12.3"
 	},
 	"dependencies": {
+		"three": "^0.127.0",
 		"webgl-obj-loader": "^2.0.8"
 	}
 }
