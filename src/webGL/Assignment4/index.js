@@ -27,6 +27,9 @@ async function main() {
       //var renderer = new THREE.WebGLRenderer();
       renderer.setClearColor(new THREE.Color(0x000000));
       renderer.setSize(window.innerWidth*0.9, window.innerHeight);
+      renderer.shadowMap.enabled = true;//enable shadow
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.setClearColor(0xfffafa, 1);
 
 
       let move = {
@@ -311,7 +314,7 @@ async function main() {
       fbx.traverse( function ( child ) {
 
         if ( child.isMesh ) {
-          child.castShadow = true;
+          child.castShadow = false;
           child.receiveShadow = true;
         }
 
@@ -378,118 +381,6 @@ async function main() {
   }
   render();
     //requestAnimationFrame(render);
-
-
-
-
-
-
-
-
-  
-      // // show axes in the screen
-      // var axes = new THREE.AxesHelper(20);
-      // scene.add(axes);
-  
-      // // create the ground plane
-      // var planeGeometry = new THREE.PlaneGeometry(60, 20);
-      // var planeMaterial = new THREE.MeshBasicMaterial({
-      //     color: 0xAAAAAA
-      // });
-      // var plane = new THREE.Mesh(planeGeometry, planeMaterial);
-  
-      // // rotate and position the plane
-      // plane.rotation.x = -0.5 * Math.PI;
-      // plane.position.set(15, 0, 0);
-  
-      // // add the plane to the scene
-      // scene.add(plane);
-  
-      // // create a cube
-      // var cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
-      // var cubeMaterial = new THREE.MeshBasicMaterial({
-      //     color: 0xFF0000,
-      //     wireframe: true
-      // });
-      // var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-  
-      // // position the cube
-      // cube.position.set(-4, 3, 0);
-  
-      // // add the cube to the scene
-      // scene.add(cube);
-  
-      // // create a sphere
-      // var sphereGeometry = new THREE.SphereGeometry(4, 20, 20);
-      // var sphereMaterial = new THREE.MeshBasicMaterial({
-      //     color: 0x7777FF,
-      //     wireframe: true
-      // });
-      // var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-  
-      // // position the sphere
-      // sphere.position.set(20, 4, 2);
-  
-      // // add the sphere to the scene
-      // scene.add(sphere);
-  
-      // // position and point the camera to the center of the scene
-      // camera.position.set(-30, 40, 30);
-  
-  
-  //   const fov = 75;
-  //   const aspect = 2;  // the canvas default
-  //   const near = 0.1;
-  //   const far = 5;
-  //   const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-  //   camera.position.z = 2;
-  
-  //   const scene = new THREE.Scene();
-  
-  //   {
-  //     const color = 0xFFFFFF;
-  //     const intensity = 1;
-  //     const light = new THREE.DirectionalLight(color, intensity);
-  //     light.position.set(-1, 2, 4);
-  //     scene.add(light);
-  //   }
-  
-  //   const boxWidth = 1;
-  //   const boxHeight = 1;
-  //   const boxDepth = 1;
-  //   const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
-  
-  //   const material = new THREE.MeshPhongMaterial({color: 0x44aa88});  // greenish blue
-  
-  //   const cube = new THREE.Mesh(geometry, material);
-  //  scene.add(cube);
-
-
-  // {
-  //   const objLoader = new OBJLoader();
-  //   objLoader.load('./meshes/monkey/monkey.obj', (root) => {
-  //     scene.add(root);
-  //   });
-  // }
-
-
- 
-  
-  //   function render(time) {
-  //     time *= 0.001;  // convert time to seconds
-  
-  //     cube.rotation.x = time;
-  //     cube.rotation.y = time;
-  
-  //     renderer.render(scene, camera);
-  
-  //     requestAnimationFrame(render);
-  //   }
-  //   requestAnimationFrame(render);
-
-
-  
-  
   }
 
 
