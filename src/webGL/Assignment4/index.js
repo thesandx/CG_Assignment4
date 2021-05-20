@@ -165,6 +165,26 @@ async function main() {
           _Q.setFromAxisAngle(_A, -Math.PI * timeInSeconds * acceleration.y);
           _R.multiply(_Q);
         }
+        if(move.space){
+         // debugger;
+          console.log("kudna hai");
+          velocity.y = 30;
+          //velocity.y +=acceleration.y * timeInSeconds;
+          velocity.y +=75*timeInSeconds ;
+          velocity.y = Math.max(velocity.y,100);
+
+        }
+        else{
+          velocity.y = -30;
+          
+          //velocity.y +=acceleration.y * timeInSeconds;
+          velocity.y +=-75*timeInSeconds ;
+          velocity.y = Math.max(velocity.y,-100);
+          //i.e zameen ke under na jaaye
+          if(controlObject.position.y<0){
+            velocity.y=0;
+          }
+        }
     
         controlObject.quaternion.copy(_R);
     
@@ -178,14 +198,41 @@ async function main() {
         const sideways = new THREE.Vector3(1, 0, 0);
         sideways.applyQuaternion(controlObject.quaternion);
         sideways.normalize();
+
+        const upways = new THREE.Vector3(0, 1, 0);
+        upways.applyQuaternion(controlObject.quaternion);
+        upways.normalize();
+
     
         sideways.multiplyScalar(velocity.x * timeInSeconds);
         forward.multiplyScalar(velocity.z * timeInSeconds);
+        upways.multiplyScalar(velocity.y * timeInSeconds);
     
+        
+
+
+
+
+        // if (move.space && controlObject.position.y == 0.0) {
+        //   velocity.y= 30;
+        // }
+  
+        // acceleration.y= -75 * timeElapsed;
+  
+        // controlObject.position.y += timeElapsed * (
+        //   controlObject.position.y + acceleration.y * 0.5);
+        //   controlObject.position.y = Math.max(controlObject.position.y, 0.0);
+  
+        // velocity.y += acceleration.y;
+        // velocity.y = Math.max(velocity.y, -100);
+
         controlObject.position.add(forward);
+        controlObject.position.add(upways);
         controlObject.position.add(sideways);
     
         oldPosition.copy(controlObject.position);
+  
+
       }
 
       function Step(timeElapsed) {
@@ -227,9 +274,17 @@ async function main() {
     light = new THREE.AmbientLight(0x101010);
     scene.add(light);
 
+//     var hemisphereLight = new THREE.HemisphereLight(0xfffafa,0x000000, .9)
+// scene.add(hemisphereLight);
+// let sun = new THREE.DirectionalLight( 0xcdc1c5, 0.9);
+// sun.position.set( 12,6,-7 );
+// sun.castShadow = true;
+// scene.add(sun);
+
 
     const controls = new OrbitControls(camera,renderer.domElement);
     controls.target.set(0, 20, 0);
+    controls.enableZoom = false;
     controls.update();
 
 //loading resource
@@ -252,19 +307,28 @@ async function main() {
     const grassBasecolorMap = textureLoader.load("./resources/ground_texture/Stylized_Grass_003_basecolor.jpg");
     const grassAmbientMap = textureLoader.load("./resources/ground_texture/Stylized_Grass_003_ambientOcclusion.jpg");
 
+    grassBasecolorMap.wrapS = grassBasecolorMap.wrapT = THREE.RepeatWrapping;
+				grassBasecolorMap.repeat.set( 25, 25 );
+				grassBasecolorMap.anisotropy = 16;
+				grassBasecolorMap.encoding = THREE.sRGBEncoding;
 
 
 
 
+        // var sides=40;
+        // var tiers=40;
+        // var worldRadius=26;
+        // var sphereGeometry = new THREE.SphereGeometry( worldRadius, sides,tiers);
     const plane = new THREE.Mesh(
-      new THREE.PlaneGeometry(100, 100, 512, 512),
+      new THREE.PlaneGeometry(20000,20000, 512, 512),
       new THREE.MeshStandardMaterial({
          color: 0x0a7d15,
           map:grassBasecolorMap,
           normalMap:grassNormalMap,
           displacementMap:grassHeightMap,
           displacementScale:0.2,
-          roughnessMap:grassRoughnessMap
+          roughnessMap:grassRoughnessMap,
+
         }));
   plane.castShadow = false;
   plane.receiveShadow = true;
