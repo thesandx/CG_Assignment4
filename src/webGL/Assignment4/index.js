@@ -143,6 +143,10 @@ async function main() {
             groundValue = (groundValue+1)%2;  
             break;
 
+          case 'KeyH':
+          case 'Keyh':
+            onReplaceTexture();
+
         }
 
       };
@@ -359,6 +363,8 @@ async function main() {
 
       }
 
+      
+
       function Step(timeElapsed) {
         const timeElapsedS = timeElapsed * 0.001;
         if (mixers) {
@@ -394,15 +400,17 @@ async function main() {
           if (m) {
             if (texture) {
               m.map = texture;
+              
             }
-            m.specular = new THREE.Color(0x000000);
+            m.specular = new THREE.Color(0x00FF00);
           }
         }  
+        
         let colliderBox =  new THREE.Box3();
         colliderBox.setFromObject(c);
 
       });
-
+      //fbx.mesh.material.needsUpdate=true;
       let  pos = new THREE.Vector3(0, 1, 100*z);
       fbx.position.add(pos);
       colliders.push(fbx);
@@ -423,10 +431,6 @@ async function main() {
     // box.position.set(0, 1, 40*z);
     // box.castShadow = true;
     // box.receiveShadow = true;
-
-   
-
-
   }
 
   function addBoxStatic(){
@@ -630,14 +634,14 @@ async function main() {
 
 
     grassBasecolorMap.wrapS = grassBasecolorMap.wrapT = THREE.RepeatWrapping;
-				grassBasecolorMap.repeat.set( 25, 25 );
+				grassBasecolorMap.repeat.set(500, 500);
 				grassBasecolorMap.anisotropy = 16;
 				grassBasecolorMap.encoding = THREE.sRGBEncoding;
 
 
 
         marbleBasecolorMap.wrapS = marbleBasecolorMap.wrapT = THREE.RepeatWrapping;
-				marbleBasecolorMap.repeat.set( 25, 25 );
+				marbleBasecolorMap.repeat.set(50,50 );
 				marbleBasecolorMap.anisotropy = 16;
 				marbleBasecolorMap.encoding = THREE.sRGBEncoding;
 
@@ -788,6 +792,26 @@ async function main() {
   }
 
   loadAnimatedModel();
+  let start = 1000;
+
+  function onReplaceTexture() {
+    var textureLoader = new THREE.TextureLoader();
+    textureLoader.setCrossOrigin("anonymous");
+    textureLoader.load("https://picsum.photos/id/"+start+"/200/300", function (texture) {
+      start++;
+
+      // mesh is a group contains multiple sub-objects. Traverse and apply texture to all. 
+      params.target.traverse(function (child) {
+        if (child instanceof THREE.Mesh) {
+
+          // apply texture
+          child.material.map = texture
+          child.material.needsUpdate = true;
+        }
+      });
+
+    });
+  }
 
  
 
