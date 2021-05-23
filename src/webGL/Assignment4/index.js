@@ -44,11 +44,14 @@ async function main() {
         shift: false,
       };
 
+      let groundValue = 0;
+
       let params;
 
       let decceleration = new THREE.Vector3(-0.0005, -0.0001, -5.0);
       let acceleration = new THREE.Vector3(1, 0.25, 75.0);
       let velocity = new THREE.Vector3(0, 0, 0);
+
 
 
      
@@ -84,8 +87,12 @@ async function main() {
           case 'Shift':
             move.shift=true;
             break;
-
           
+          case 'Keyg':
+          case 'KeyG':
+            console.log("g press kiya");
+            groundValue = (groundValue+1)%2;  
+            break;
 
         }
 
@@ -193,6 +200,19 @@ async function main() {
           if(controlObject.position.y<0){
             velocity.y=0;
           }
+        }
+
+        if(groundValue==0){
+              currentJson = groundJson;
+             //debugger;
+             plane.material = new THREE.MeshStandardMaterial(currentJson);
+              plane.material.needsUpdate = true;
+        }
+        else{
+          //debugger;
+          currentJson = marbleJson;
+          plane.material = new THREE.MeshStandardMaterial(currentJson);
+          plane.material.needsUpdate = true;
         }
     
         controlObject.quaternion.copy(_R);
@@ -528,10 +548,49 @@ async function main() {
     const grassBasecolorMap = textureLoader.load("./resources/ground_texture/Stylized_Grass_003_basecolor.jpg");
     const grassAmbientMap = textureLoader.load("./resources/ground_texture/Stylized_Grass_003_ambientOcclusion.jpg");
 
+
+    const marbleNormalMap = textureLoader.load("./resources/marble_texture/Pebbles_024_Normal.jpg");
+    const marbleRoughnessMap = textureLoader.load("./resources/marble_texture/Pebbles_024_Roughness.jpg");
+    const marbleHeightMap = textureLoader.load("./resources/marble_texture/Pebbles_024_Height.jpg");
+    const marbleBasecolorMap = textureLoader.load("./resources/marble_texture/Pebbles_024_Basecolor.jpg");
+    const marbleAmbientMap = textureLoader.load("./resources/marble_texture/Pebbles_024_AmbientOcclusion.jpg");
+
+
+    let groundJson = {
+      // color: 0x0a7d15,
+        map:grassBasecolorMap,
+        normalMap:grassNormalMap,
+        displacementMap:grassHeightMap,
+        displacementScale:0.2,
+        roughnessMap:grassRoughnessMap,
+
+      };
+
+
+      let marbleJson = {
+        map:marbleBasecolorMap,
+        normalMap:marbleNormalMap,
+        displacementMap:marbleHeightMap,
+        displacementScale:0.2,
+        roughnessMap:marbleRoughnessMap,
+      }
+
+      let currentJson = groundJson;
+
+
+
+
     grassBasecolorMap.wrapS = grassBasecolorMap.wrapT = THREE.RepeatWrapping;
 				grassBasecolorMap.repeat.set( 25, 25 );
 				grassBasecolorMap.anisotropy = 16;
 				grassBasecolorMap.encoding = THREE.sRGBEncoding;
+
+
+
+        marbleBasecolorMap.wrapS = marbleBasecolorMap.wrapT = THREE.RepeatWrapping;
+				marbleBasecolorMap.repeat.set( 25, 25 );
+				marbleBasecolorMap.anisotropy = 16;
+				marbleBasecolorMap.encoding = THREE.sRGBEncoding;
 
 
 
@@ -542,15 +601,7 @@ async function main() {
         // var sphereGeometry = new THREE.SphereGeometry( worldRadius, sides,tiers);
     const plane = new THREE.Mesh(
       new THREE.PlaneGeometry(20000,20000, 512, 512),
-      new THREE.MeshStandardMaterial({
-         color: 0x0a7d15,
-          map:grassBasecolorMap,
-          normalMap:grassNormalMap,
-          displacementMap:grassHeightMap,
-          displacementScale:0.2,
-          roughnessMap:grassRoughnessMap,
-
-        }));
+      new THREE.MeshStandardMaterial(groundJson));
   plane.castShadow = false;
   plane.receiveShadow = true;
   plane.rotation.x = -Math.PI / 2;
