@@ -3,6 +3,9 @@ import {OBJLoader} from '/node_modules/three/examples/jsm/loaders/OBJLoader.js';
 import {OrbitControls} from '/node_modules/three/examples/jsm/controls/OrbitControls.js';
 import {FBXLoader} from '/node_modules/three/examples/jsm/loaders/FBXLoader.js';
 import {GLTFLoader} from '/node_modules/three/examples/jsm/loaders/GLTFLoader.js';
+import {GUI} from 'https://threejsfundamentals.org/threejs/../3rdparty/dat.gui.module.js';
+import { FlyControls } from '/node_modules/three/examples/jsm/controls/FlyControls.js';
+
 
 
 
@@ -33,7 +36,53 @@ async function main() {
 
       let colliders = [];
       let unused = [];
-
+      function initCamera(initialPosition) {
+        var position = (initialPosition !== undefined) ? initialPosition : new THREE.Vector3(30,40,0);
+    
+        var camera = new THREE.PerspectiveCamera(45,2,0.1,1000);
+        camera.position.copy(position);
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
+    
+        return camera;
+    }
+    
+    
+    
+    function initFlyControls(camera,renderer)
+    {  
+       
+       var flyControls = new FlyControls(camera,renderer.domElement);
+       flyControls.movementSpeed = 20;
+       console.log("fly controls")
+       flyControls.rollSpeed = Math.PI / 24;
+       flyControls.autoForward = true;
+       flyControls.dragToLook = false;
+       return flyControls;
+    }
+    var camera_selected = 1;
+    var flyControls ;
+    var firstPersonControl ;
+    //var cam = 1;
+    
+        function updateCamera (cam) {
+          if (cam === 1) {
+            camera_selected = 1;
+            flyControls = undefined;
+            firstPersonControl = undefined;
+            camera = initCamera(new THREE.Vector3(60,70,0));
+            console.log("default");
+            renderer.render(scene, camera);
+          }
+          if (cam === 2) {
+            camera_selected = 2;
+            camera = initCamera(new THREE.Vector3(60,70,0));
+            firstPersonControl = undefined;
+            flyControls = initFlyControls(camera, renderer);
+            console.log("view 2");
+            renderer.render(scene, camera);
+          }
+          
+        }
 
       let move = {
         forward: false,
@@ -653,6 +702,89 @@ async function main() {
       } );
       scene.add(fbx);
     });
+    var controls2 = new function(){
+      this.cam = 1;
+      console.log("hi");
+      this.changeCamera=function(e){
+        this.cam=e;
+        updateCamera(this.cam);  
+        console.log("hi");
+    }
+    }
+   
+    controls2.changeCamera(1);
+   
+   
+    
+//lights 
+    var ambiColor = "#0c0c0c";
+    var ambientLight = new THREE.AmbientLight(ambiColor);
+    scene.add(ambientLight);
+
+    // add spotlight for the shadows
+    // add spotlight for the shadows
+    var manLight = new THREE.SpotLight(0xffffff);
+    manLight.position.set(-40, 60, -10);
+    manLight.castShadow = true;
+    //scene.add( spotLight );
+
+    var pointColor = "#ccffcc";
+    var pointLight = new THREE.PointLight(pointColor);
+    pointLight.distance = 100;
+    scene.add(pointLight);
+
+    var controls1 = new function () {
+      this.ambientColor = ambiColor;
+      this.pointColor = pointColor;
+      this.intensity = 1;
+      this.distance = 100;
+      
+  };
+
+  var gui = new GUI();
+
+  gui.add(controls2,'cam',1,2).step(1).onChange(controls2.changeCamera);
+  controls2.changeCamera(1);
+  gui.addColor(controls1, 'ambientColor').onChange(function (e) {
+    ambientLight.color = new THREE.Color(e);
+});
+
+
+  gui.addColor(controls1, 'pointColor').onChange(function (e) {
+      pointLight.color = new THREE.Color(e);
+  });
+
+  gui.add(controls1, 'intensity', 0, 3).onChange(function (e) {
+      pointLight.intensity = e;
+  });
+
+  gui.add(controls1, 'distance', 0, 100).onChange(function (e) {
+      pointLight.distance = e;
+  });
+
+  class ColorGUIHelper {
+    constructor(object, prop) {
+      this.object = object;
+      this.prop = prop;
+    }
+    get value() {
+      return `#${this.object[this.prop].getHexString()}`;
+    }
+    set value(hexString) {
+      this.object[this.prop].set(hexString);
+    }
+  }
+
+  {
+    const color = 0xFFFFFF;
+    const intensity = 1;
+    const light = new THREE.AmbientLight(color, intensity);
+    scene.add(light);
+
+    const gui = new GUI();
+    gui.addColor(new ColorGUIHelper(light, 'color'), 'value').name('color');
+    gui.add(light, 'intensity', 0, 2, 0.01);
+  }
   }
 
   loadAnimatedModel();
@@ -684,6 +816,8 @@ async function main() {
     function render() {
 
       requestAnimationFrame((t) => {
+        if (flyControls !== undefined)
+          flyControls.update(clock.getDelta());
         if (previousRAF === null) {
           previousRAF = t;
         }
