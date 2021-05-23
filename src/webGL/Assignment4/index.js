@@ -26,10 +26,13 @@ async function main() {
       // create a render and set the size
       //var renderer = new THREE.WebGLRenderer();
       renderer.setClearColor(new THREE.Color(0x000000));
-      renderer.setSize(window.innerWidth*0.9, window.innerHeight);
+      renderer.setSize(window.innerWidth*.95, window.innerHeight);
       renderer.shadowMap.enabled = true;//enable shadow
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       renderer.setClearColor(0xfffafa, 1);
+
+      let colliders = [];
+      let unused = [];
 
 
       let move = {
@@ -44,7 +47,7 @@ async function main() {
       let params;
 
       let decceleration = new THREE.Vector3(-0.0005, -0.0001, -5.0);
-      let acceleration = new THREE.Vector3(1, 0.25, 50.0);
+      let acceleration = new THREE.Vector3(1, 0.25, 75.0);
       let velocity = new THREE.Vector3(0, 0, 0);
 
 
@@ -131,8 +134,9 @@ async function main() {
 
 
 
-
       function Update(timeInSeconds) {
+        //v = u+at
+       
         const frameDecceleration = new THREE.Vector3(
             velocity.x * decceleration.x,
             velocity.y * decceleration.y,
@@ -145,12 +149,17 @@ async function main() {
         velocity.add(frameDecceleration);
     
         const controlObject = params.target;
+        //debugger;
         const _Q = new THREE.Quaternion();
         const _A = new THREE.Vector3();
         const _R = controlObject.quaternion.clone();
     
+        //v = u+at
         if (move.forward) {
-          velocity.z += acceleration.z * timeInSeconds;
+          if(true){
+            velocity.z += acceleration.z * timeInSeconds;
+          }
+         
         }
         if (move.backward) {
           velocity.z -= acceleration.z * timeInSeconds;
@@ -207,6 +216,26 @@ async function main() {
         sideways.multiplyScalar(velocity.x * timeInSeconds);
         forward.multiplyScalar(velocity.z * timeInSeconds);
         upways.multiplyScalar(velocity.y * timeInSeconds);
+        
+
+        // let visible=[];
+        // let invisible = [];
+
+        // for(let obj of objects){
+        //     obj.position.z -= timeInSeconds*speed;
+        //     if(obj.position.z<0){
+        //           invisible.push(obj);
+        //           obj.mesh.visible = false;
+        //     }
+        //     else{
+        //       visible.push(obj);
+        //     }
+        //     obj.position.copy(obj.position);
+        // }
+
+
+        // objects=visible;
+        // unused.push(...invisible);
     
         
 
@@ -231,7 +260,33 @@ async function main() {
         controlObject.position.add(sideways);
     
         oldPosition.copy(controlObject.position);
+
+        checkCollision();
+        updateBox(timeInSeconds);
+        maybeSpawn();
+
   
+
+      }
+
+
+      function checkCollision(){
+        let playerBox = new THREE.Box3();
+        playerBox.setFromObject(params.target);
+        for (let cur of colliders) {
+         // const cur = c.collider;
+          let box = new THREE.Box3();
+          box.setFromObject(cur);
+          if (box.intersectsBox(playerBox)) {
+            console.log("collision");
+            params.target.position.x=10;
+            return true;
+          }
+          else{
+            params.target.position.x=0;
+            return false;
+          }
+        }
 
       }
 
@@ -245,6 +300,168 @@ async function main() {
           Update(timeElapsedS);
         }
       }
+
+
+      const START_POS = 100;
+      const SEPARATION_DISTANCE = 20;
+
+  //function to add obstacles.
+  function addBox(z){
+
+
+    const loader = new FBXLoader();
+    loader.setPath('./resources/');
+    loader.load('Cactus3.fbx', (fbx) => {
+      fbx.scale.setScalar(0.1);
+      fbx.traverse(c => {
+        c.castShadow = true;
+        //c.position(0, 1, 40*z);
+        let materials = c.material;
+        if (!(c.material instanceof Array)) {
+          materials = [c.material];
+        }
+
+        for (let m of materials) {
+          if (m) {
+            if (texture) {
+              m.map = texture;
+            }
+            m.specular = new THREE.Color(0x000000);
+          }
+        }  
+        let colliderBox =  new THREE.Box3();
+        colliderBox.setFromObject(c);
+
+      });
+
+      let  pos = new THREE.Vector3(0, 1, 100*z);
+      fbx.position.add(pos);
+      colliders.push(fbx);
+      scene.add(fbx);
+
+    });
+
+      // params = {
+      //   target: fbx,
+      //   camera: camera,
+      // }
+
+    // const box = new THREE.Mesh(
+    //   new THREE.BoxGeometry(2, 2, 2),
+    //   new THREE.MeshStandardMaterial({
+    //       color: 0xFF8080,
+    //   }));
+    // box.position.set(0, 1, 40*z);
+    // box.castShadow = true;
+    // box.receiveShadow = true;
+
+   
+
+
+  }
+
+  function addBoxStatic(){
+    const loader = new FBXLoader();
+    loader.setPath('./resources/');
+    loader.load('Cactus3.fbx', (fbx) => {
+      fbx.scale.setScalar(0.1);
+      fbx.traverse(c => {
+        c.castShadow = true;
+        //c.position(0, 1, 40*z);
+        let materials = c.material;
+        if (!(c.material instanceof Array)) {
+          materials = [c.material];
+        }
+
+        for (let m of materials) {
+          if (m) {
+            if (texture) {
+              m.map = texture;
+            }
+            m.specular = new THREE.Color(0x000000);
+          }
+        }  
+        let colliderBox =  new THREE.Box3();
+        colliderBox.setFromObject(c);
+
+      });
+
+      var x = 500; // can be any number
+      var randx = Math.floor(Math.random()*x) + 1;
+      var y = 100; // can be any number
+      var randy= Math.floor(Math.random()*y) + 1;
+      var z = 500; // can be any number
+      var randz = Math.floor(Math.random()*z) + 1;
+      let  pos = new THREE.Vector3(randx,0,randz);
+      fbx.position.add(pos);
+      //colliders.push(fbx);
+      scene.add(fbx);
+
+    });
+
+      // params = {
+      //   target: fbx,
+      //   camera: camera,
+      // }
+
+    // const box = new THREE.Mesh(
+    //   new THREE.BoxGeometry(2, 2, 2),
+    //   new THREE.MeshStandardMaterial({
+    //       color: 0xFF8080,
+    //   }));
+    // box.position.set(0, 1, 40*z);
+    // box.castShadow = true;
+    // box.receiveShadow = true;
+
+   
+
+
+  }
+ 
+
+
+  function maybeSpawn() {
+    let obj = null;
+    if(unused.length>0 ){
+      obj = unused.pop();
+     if(obj!=undefined){
+      obj.visible = true;
+      obj.position.z = colliders[colliders.length-1].position.z+START_POS+SEPARATION_DISTANCE+50;
+      colliders.push(obj);
+     }
+     else{
+     addBox(colliders[colliders.length-1].position.z+START_POS+SEPARATION_DISTANCE+50);
+     }
+    }
+    
+  }
+
+
+  function updateBox(timeElapsed){
+
+    const invisible = [];
+      const visible = [];
+
+    for(let obj of colliders){
+      //debugger;
+      if(obj!=undefined && obj.position!=undefined){ 
+         if (obj.position.z < -5) {
+          invisible.push(obj);
+          //debugger;
+          obj.visible = false;
+          //obj.position.z = colliders[colliders.length-1].position.z+SEPARATION_DISTANCE+(timeElapsed * 30);
+        } else {
+          visible.push(obj);
+          obj.position.z -= timeElapsed * 30;
+        }
+       
+      }
+    
+    }
+    colliders=visible;
+    unused.push(...invisible);
+  }
+
 
 
 
@@ -288,6 +505,8 @@ async function main() {
     controls.update();
 
 //loading resource
+
+//load surrounding i.e mountains.
     const loader = new THREE.CubeTextureLoader();
     const texture = loader.load([
         './resources/posx.jpg',
@@ -299,6 +518,8 @@ async function main() {
     ]);
     scene.background = texture;
 
+
+    //ground textures
 
     const textureLoader = new THREE.TextureLoader();
     const grassNormalMap = textureLoader.load("./resources/ground_texture/Stylized_Grass_003_normal.jpg");
@@ -337,20 +558,16 @@ async function main() {
   scene.add(plane);
 
 
-  const box = new THREE.Mesh(
-    new THREE.BoxGeometry(2, 2, 2),
-    new THREE.MeshStandardMaterial({
-        color: 0x808080,
-    }));
-  box.position.set(0, 1, 0);
-  box.castShadow = true;
-  box.receiveShadow = true;
-  //scene.add(box);
+  for(let i=1;i<10;i++){
+        addBox(i);
+        addBoxStatic();
+  }
 
   let mixers = [];
   let previousRAF = null;
   const clock = new THREE.Clock();
 
+  //loading player
   async function loadAnimatedModel(){
     const loader = new FBXLoader();
     loader.setPath('./resources/');
@@ -389,17 +606,7 @@ async function main() {
 
   loadAnimatedModel();
 
-
-  // const anim = new FBXLoader();
-  //     anim.setPath('./resources/');
-  //     anim.load('mutant.fbx', (anim) => {
-  //       const m = new THREE.AnimationMixer(fbx);
-  //       this._mixers.push(m);
-  //       const idle = m.clipAction(anim.animations[0]);
-  //       idle.play();
-  //     });
-  //     scene.add(anim);
-
+ 
 
 
   // {
