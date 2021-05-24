@@ -46,7 +46,7 @@ async function main() {
 
       let groundValue = 0;
 
-      let params;
+      let params={};
 
       let decceleration = new THREE.Vector3(-0.0005, -0.0001, -5.0);
       let acceleration = new THREE.Vector3(1, 0.25, 75.0);
@@ -90,7 +90,6 @@ async function main() {
           
           case 'Keyg':
           case 'KeyG':
-            console.log("g press kiya");
             groundValue = (groundValue+1)%2;  
             break;
 
@@ -298,7 +297,6 @@ async function main() {
           let box = new THREE.Box3();
           box.setFromObject(cur);
           if (box.intersectsBox(playerBox)) {
-            console.log("collision");
             params.target.position.x=10;
             return true;
           }
@@ -521,7 +519,7 @@ async function main() {
 
     const controls = new OrbitControls(camera,renderer.domElement);
     controls.target.set(0, 20, 0);
-    controls.enableZoom = false;
+    controls.enableZoom = true;
     controls.update();
 
 //loading resource
@@ -620,28 +618,26 @@ async function main() {
 
   //loading player
   async function loadAnimatedModel(){
-    const loader = new FBXLoader();
+    let loader = new FBXLoader();
     loader.setPath('./resources/');
-    loader.load('remy.fbx', (fbx) => {
-      fbx.scale.setScalar(0.1);
+    loader.load('walk2.fbx',function(fbx){
+      fbx.scale.setScalar(0.27);
       fbx.traverse(c => {
         c.castShadow = true;
       });
 
-      params = {
-        target: fbx,
-        camera: camera,
-      }
+      params.target=fbx;
+      params.camera=camera;
       //controls = new BasicCharacterControls(params);
 
       const anim = new FBXLoader();
       anim.setPath('./resources/');
-      anim.load('walk_idle.fbx', (anim) => {
-       let m = new THREE.AnimationMixer(fbx);
+      anim.load('walk_idle_2.fbx', (anim) => {
+        let m = new THREE.AnimationMixer(fbx);
         mixers.push(m)
         const idle = m.clipAction(anim.animations[0]);
         idle.play();
-        
+
       });
       fbx.traverse( function ( child ) {
 
@@ -652,12 +648,117 @@ async function main() {
 
       } );
       scene.add(fbx);
+      fbx.position.z=50;
+      fbx.updateMatrix();
     });
+
+    loader = new FBXLoader();
+    loader.setPath('./resources/');
+    loader.load('remy.fbx', (fbx) => {
+      fbx.scale.setScalar(0.1);
+      fbx.traverse(c => {
+        c.castShadow = true;
+      });
+
+      params.target2=fbx;
+      //controls = new BasicCharacterControls(params);
+
+      const anim = new FBXLoader();
+      anim.setPath('./resources/');
+      anim.load('walk_idle.fbx', (anim) => {
+        let m = new THREE.AnimationMixer(fbx);
+        mixers.push(m)
+        const idle = m.clipAction(anim.animations[0]);
+        idle.play();
+      });
+      fbx.traverse( function ( child ) {
+
+        if ( child.isMesh ) {
+          child.castShadow = false;
+          child.receiveShadow = true;
+
+        }
+      } );
+      scene.add(fbx);
+      fbx.position.x=-50;
+      fbx.updateMatrix();
+    });
+
+    loader = new FBXLoader();
+    loader.setPath('./resources/');
+    loader.load('walk3.fbx', (fbx) => {
+      fbx.scale.setScalar(0.275);
+      fbx.traverse(c => {
+        c.castShadow = true;
+      });
+
+      params.target3=fbx;
+      //controls = new BasicCharacterControls(params);
+
+      const anim = new FBXLoader();
+      anim.setPath('./resources/');
+      anim.load('Walking.fbx', (anim) => {
+        let m = new THREE.AnimationMixer(fbx);
+        mixers.push(m)
+        const idle = m.clipAction(anim.animations[0]);
+        idle.play();
+      });
+      fbx.traverse( function ( child ) {
+
+        if ( child.isMesh ) {
+          child.castShadow = false;
+          child.receiveShadow = true;
+        }
+
+      } );
+      scene.add(fbx);
+      fbx.position.x=50;
+      fbx.updateMatrix();
+    });
+
   }
+  async function loadLeaderModel() {
+    let loader = new FBXLoader();
+    loader.setPath('./resources/');
+    loader.load('walk2.fbx',function (fbx) {
+      fbx.scale.setScalar(0.27);
+      fbx.traverse(c => {
+        c.castShadow = true;
+      });
 
-  loadAnimatedModel();
+      params.target = fbx;
+      params.camera = camera;
 
- 
+      //controls = new BasicCharacterControls(params);
+      const anim = new FBXLoader();
+      anim.setPath('./resources/');
+      anim.load('walk_idle_2.fbx', (anim) => {
+        let m = new THREE.AnimationMixer(fbx);
+        mixers.push(m)
+        const idle = m.clipAction(anim.animations[0]);
+        idle.play();
+
+      });
+      fbx.traverse(function (child) {
+
+        if (child.isMesh) {
+          child.castShadow = false;
+          child.receiveShadow = true;
+        }
+
+      });
+      scene.add(fbx);
+      fbx.position.z = 50;
+      fbx.updateMatrix();
+    });
+
+  }
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+  await loadLeaderModel();
+  await loadAnimatedModel();
+  await sleep(4000);
 
 
   // {
@@ -681,8 +782,7 @@ async function main() {
     renderer.render(scene, camera);
 
 
-    function render() {
-
+    async function render() {
       requestAnimationFrame((t) => {
         if (previousRAF === null) {
           previousRAF = t;
