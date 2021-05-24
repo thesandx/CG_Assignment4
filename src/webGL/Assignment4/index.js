@@ -941,7 +941,7 @@ function updateAvatar(attach) {
   //   });
   // }
   
-function updateScence(){
+function updateScene(attach){
   if (attach1 === 2) {
     //scene.remove(group);
     scene.add(man1);
