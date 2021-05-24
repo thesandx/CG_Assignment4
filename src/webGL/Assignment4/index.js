@@ -5,6 +5,7 @@ import {FBXLoader} from '/node_modules/three/examples/jsm/loaders/FBXLoader.js';
 import {GLTFLoader} from '/node_modules/three/examples/jsm/loaders/GLTFLoader.js';
 import {GUI} from 'https://threejsfundamentals.org/threejs/../3rdparty/dat.gui.module.js';
 import { FlyControls } from '/node_modules/three/examples/jsm/controls/FlyControls.js';
+import {MTLLoader} from 'https://threejsfundamentals.org/threejs/resources/threejs/r127/examples/jsm/loaders/MTLLoader.js';
 
 
 
@@ -36,6 +37,7 @@ async function main() {
 
       let colliders = [];
       let unused = [];
+      var attach1 = 1;;
       function initCamera(initialPosition) {
         var position = (initialPosition !== undefined) ? initialPosition : new THREE.Vector3(30,40,0);
     
@@ -62,6 +64,9 @@ async function main() {
     var camera_selected = 1;
     var flyControls ;
     var firstPersonControl ;
+    var chair1;
+    var man1;
+
     //var cam = 1;
     
         function updateCamera (cam) {
@@ -190,7 +195,7 @@ async function main() {
 
 
       document.addEventListener( 'keydown', onKeyDown );
-			document.addEventListener( 'keyup', onKeyUp );
+	  document.addEventListener( 'keyup', onKeyUp );
 
 
 
@@ -608,8 +613,7 @@ async function main() {
     const marbleBasecolorMap = textureLoader.load("./resources/marble_texture/Pebbles_024_Basecolor.jpg");
     const marbleAmbientMap = textureLoader.load("./resources/marble_texture/Pebbles_024_AmbientOcclusion.jpg");
 
-
-    let groundJson = {
+ let groundJson = {
       // color: 0x0a7d15,
         map:grassBasecolorMap,
         normalMap:grassNormalMap,
@@ -706,6 +710,9 @@ async function main() {
       } );
       scene.add(fbx);
     });
+   
+
+    //camera controls
     var controls2 = new function(){
       this.cam = 1;
       console.log("hi");
@@ -790,8 +797,119 @@ async function main() {
     gui.add(light, 'intensity', 0, 2, 0.01);
   }
   }
-
+  var attach;
+  var group;
   loadAnimatedModel();
+ // var attach = 1;
+  var controls3 = new function(){
+    this.attach = 1;
+  this.attachAvatar = function(e) {
+    this.attach = e;
+    attach1 = this.attach;
+    updateAvatar(this.attach);
+}
+  }
+  var gui = new GUI();
+  gui.add(controls3,'attach',1,2).step(1).onChange(controls3.attachAvatar);
+  controls3.attachAvatar(1);
+//controls3.attachAvatar(1);
+function updateAvatar(attach) {
+    attach = attach;
+    initMovingObjects(attach1);
+    updateScene(attach1);
+  }
+  function initMovingObjects(attach)
+
+{   const objLoader = new OBJLoader();
+    const mtlLoader = new MTLLoader();
+    group = new THREE.Group();
+    mtlLoader.load('resources/chair.mtl', (mtl) => {
+      mtl.preload();
+      objLoader.setMaterials(mtl);
+      objLoader.load('resources/chair.obj', (root) => {
+        root.children.forEach(function (child) {
+            child.geometry.computeVertexNormals();
+            child.geometry.computeFaceNormals();
+          });
+          
+          var follower1 = root.clone();
+          follower1.name = 'leader';
+      follower1.position.set(-40, -40, -30);
+      //follower1.scale.set(0.03, 0.03, 0.03);
+      follower1.name = "1";
+      group.add(follower1);
+      chair1 = follower1;
+      group.position.set(0, 30, -50);
+{
+       var objloader1 = new OBJLoader();
+        objloader1.load('./resources/astronaut.obj', (man) => {
+         man.children.forEach(function (child) {
+           // child.material = material;
+            child.geometry.computeVertexNormals();
+            child.geometry.computeFaceNormals();
+          });
+          man.scale.set(0.2, 0.2, 0.2);
+          man.position.set(-20, 0, 0);
+          man.rotation.y = 0;
+          man.castShadow = true;
+          man1 = man;
+          if (attach1 === 1) {
+            group.add(man);
+          }
+         /* if (attach1 === 2) {
+            man.position.set(-30, -40, 50);
+            scene.add(man);
+          }*/
+        });
+    }
+       // scene.add(group);
+        
+       
+      });
+    });
+  }
+  const xSpeed = 1;
+  const zSpeed = 1;
+  const ySpeed = 1;
+
+  window.addEventListener("keydown", function (event) {
+  if (attach1 === 2) {
+
+    switch (event.key) {
+
+      case "ArrowUp":
+          man1.position.z -= zSpeed;
+          break;
+
+      case "ArrowDown":
+          man1.position.z += zSpeed;
+          break;
+
+      case "ArrowLeft":
+          man1.position.x -= xSpeed;
+          break;
+
+      case "ArrowRight":
+          man1.position.x += xSpeed;
+          break;
+
+      case "w":
+          man1.position.y += ySpeed;
+          break;
+
+      case "s":
+        
+          man1.position.y -= ySpeed;
+      
+        break;
+
+    }
+  }
+}, true);
+        
+
+
+ 
   let start = 1000;
 
   function onReplaceTexture() {
@@ -823,8 +941,16 @@ async function main() {
   //   });
   // }
   
-
-
+function updateScence(){
+  if (attach1 === 2) {
+    //scene.remove(group);
+    scene.add(man1);
+      
+      //scene.add(chair1);
+      //man1.position.set(-30, -40, 50);
+    }
+    scene.add(group);
+  }
 
 
 
@@ -834,14 +960,21 @@ async function main() {
     //document.getElementById("webgl-output").appendChild(renderer.domElement);
 
     // render the scene
-    renderer.render(scene, camera);
+   // renderer.render(scene, camera);
 
+ 
+   // renderer.render(scene, camera);
 
     function render() {
 
       requestAnimationFrame((t) => {
         if (flyControls !== undefined)
           flyControls.update(clock.getDelta());
+
+        group.position.x = 200 * Math.cos(clock.getElapsedTime() * 0.5) - 100;
+        group.position.z = 400 * Math.sin(clock.getElapsedTime() * 0.5) - 300; 
+       
+        
         if (previousRAF === null) {
           previousRAF = t;
         }
