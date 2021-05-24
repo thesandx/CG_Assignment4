@@ -72,7 +72,7 @@ async function main() {
             camera_selected = 1;
             flyControls = undefined;
             firstPersonControl = undefined;
-            camera = initCamera(new THREE.Vector3(0,70,-150));
+            camera = initCamera(new THREE.Vector3(-50,70,-150));
             console.log("default");
             renderer.render(scene, camera);
           }
@@ -350,6 +350,11 @@ async function main() {
         controlObject.position.add(sideways);
     
         oldPosition.copy(controlObject.position);
+if(controlObject!==undefined){
+        params.target1.position.x = controlObject.position.x;
+        params.target1.position.y = controlObject.position.y;
+        params.target1.position.z = controlObject.position.z-80;
+}
 
         checkCollision();
         updateBox(timeInSeconds);
@@ -758,7 +763,89 @@ async function main() {
 
       } );
       scene.add(fbx);
+      const loader1 = new FBXLoader();
+    loader1.setPath('./resources/');
+    loader1.load('ely.fbx', (fbx) => {
+      fbx.scale.setScalar(0.15);
+      fbx.position.z = params.target.position.z-80;
+      fbx.position.x = params.target.position.x;
+      fbx.position.y = params.target.position.y;
+      fbx.traverse(c => {
+        c.castShadow = true;
+      });
+
+      params.target1=fbx;
+      //controls = new BasicCharacterControls(params);
+
+      const anim = new FBXLoader();
+      anim.setPath('./resources/');
+      anim.load('walk_idle.fbx', (anim) => {
+       let m = new THREE.AnimationMixer(fbx);
+        mixers.push(m)
+        const idle = m.clipAction(anim.animations[0]);
+        idle.play();
+        
+      });
+      fbx.traverse( function ( child ) {
+
+        if ( child.isMesh ) {
+          child.castShadow = false;
+          child.receiveShadow = true;
+        }
+
+      } );
+      scene.add(fbx);
+    
     });
+
+
+
+
+
+    // const loader2 = new FBXLoader();
+    // loader2.setPath('./resources/');
+    // loader2.load('maria.fbx', (fbx) => {
+    //   //fbx.scale.setScalar(0.15);
+    //   // fbx.position.z = params.target.position.z-100;
+    //   // fbx.position.x = params.target.position.x;
+    //   // fbx.position.y = params.target.position.y;
+    //   fbx.traverse(c => {
+    //     c.castShadow = true;
+    //   });
+
+    //   params.target2=fbx;
+    //   //controls = new BasicCharacterControls(params);
+
+    //   const anim = new FBXLoader();
+    //   anim.setPath('./resources/');
+    //   anim.load('walk_idle.fbx', (anim) => {
+    //    let m = new THREE.AnimationMixer(fbx);
+    //     mixers.push(m)
+    //     const idle = m.clipAction(anim.animations[0]);
+    //     idle.play();
+        
+    //   });
+    //   fbx.traverse( function ( child ) {
+
+    //     if ( child.isMesh ) {
+    //       child.castShadow = false;
+    //       child.receiveShadow = true;
+    //     }
+
+    //   });
+    //   scene.add(fbx);
+   // });
+
+    });
+
+
+
+    
+
+
+
+
+
     var controls2 = new function(){
       this.cam = 1;
       console.log("hi");
