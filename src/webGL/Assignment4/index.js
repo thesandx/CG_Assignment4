@@ -24,7 +24,7 @@ async function main() {
 
       // create a camera, which defines where we're looking at.
       var camera = new THREE.PerspectiveCamera(45, 2, 0.1, 1000); //fov, aspect, near, far
-      camera.position.set(75, 20, 0);
+      camera.position.set(0,70,-100);
   
       // create a render and set the size
       //var renderer = new THREE.WebGLRenderer();
@@ -36,26 +36,29 @@ async function main() {
 
       let colliders = [];
       let unused = [];
+
+
+      
       function initCamera(initialPosition) {
-        var position = (initialPosition !== undefined) ? initialPosition : new THREE.Vector3(30,40,0);
-    
+        var position = (initialPosition !== undefined) ? initialPosition : new THREE.Vector3(0,70,-100);//30,40,0
+    //debugger;
         var camera = new THREE.PerspectiveCamera(45,2,0.1,1000);
         camera.position.copy(position);
-        camera.lookAt(new THREE.Vector3(0, 0, 0));
+        camera.lookAt(new THREE.Vector3(-20, 50, 100));
     
         return camera;
     }
     
     
     
-    function initFlyControls(camera,renderer)
+    function initFlyControls(camera,renderer,autoForward)
     {  
        
        var flyControls = new FlyControls(camera,renderer.domElement);
        flyControls.movementSpeed = 20;
        console.log("fly controls")
        flyControls.rollSpeed = Math.PI / 24;
-       flyControls.autoForward = true;
+       flyControls.autoForward = autoForward;
        flyControls.dragToLook = false;
        return flyControls;
     }
@@ -69,16 +72,30 @@ async function main() {
             camera_selected = 1;
             flyControls = undefined;
             firstPersonControl = undefined;
-            camera = initCamera(new THREE.Vector3(60,70,0));
+            camera = initCamera(new THREE.Vector3(0,70,-150));
             console.log("default");
             renderer.render(scene, camera);
           }
           if (cam === 2) {
             camera_selected = 2;
-            camera = initCamera(new THREE.Vector3(60,70,0));
+            camera = initCamera(new THREE.Vector3(0,500,10)); //60,70,0
             firstPersonControl = undefined;
-            flyControls = initFlyControls(camera, renderer);
+            flyControls = initFlyControls(camera, renderer,true);
             console.log("view 2");
+            renderer.render(scene, camera);
+          }
+          if(cam===3){
+            camera_selected = 3;
+            //debugger;
+            if(params.target===undefined){
+            camera = initCamera(new THREE.Vector3(0,50,0)); 
+            }//60,70,0
+            else{
+              camera = initCamera(new THREE.Vector3(params.target.x,50,params.target.z)); 
+            }
+            firstPersonControl = undefined;
+            flyControls = initFlyControls(camera, renderer,false);
+            console.log("view 3");
             renderer.render(scene, camera);
           }
           
@@ -747,7 +764,7 @@ async function main() {
 
   var gui = new GUI();
 
-  gui.add(controls2,'cam',1,2).step(1).onChange(controls2.changeCamera);
+  gui.add(controls2,'cam',1,3).step(1).onChange(controls2.changeCamera);
   controls2.changeCamera(1);
   gui.addColor(controls1, 'ambientColor').onChange(function (e) {
     ambientLight.color = new THREE.Color(e);
