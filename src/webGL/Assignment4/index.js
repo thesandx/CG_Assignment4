@@ -354,6 +354,9 @@ async function main() {
         checkCollision();
         updateBox(timeInSeconds);
         maybeSpawn();
+   
+
+
 
   
 
@@ -448,6 +451,34 @@ async function main() {
     // box.position.set(0, 1, 40*z);
     // box.castShadow = true;
     // box.receiveShadow = true;
+  }
+
+  function addStreetLight(){
+
+    let distance = 25.0;
+    let angle = Math.PI/4;
+    let  p = 0.5;
+    let decay = 1.0;
+
+    for(let i=0;i<10;i++){
+      let light = new THREE.SpotLight(0xFFFFFF,1.0,distance,angle,p,decay);
+      light.position.set(20,10,20*i);
+      //light.distance = 50;
+      light.target.position.set(10,0,20*i);
+
+      scene.add(light);
+      scene.add(light.target);
+
+      let light1 = new THREE.SpotLight(0xFFFFFF,1.0,distance,angle,p,decay);
+    light1.position.set(-10,10,20*i);
+    light1.target.position.set(-20,0,20*i)
+    //light1.distance = 50;
+    scene.add(light1);
+    scene.add(light1.target);
+
+    }
+    
+
   }
 
   function addBoxStatic(){
@@ -684,9 +715,14 @@ async function main() {
         addBoxStatic();
   }
 
+  addStreetLight();
+
   let mixers = [];
   let previousRAF = null;
   const clock = new THREE.Clock();
+
+
+
 
   //loading player
   async function loadAnimatedModel(){
@@ -751,7 +787,7 @@ async function main() {
 
     var pointColor = "#ccffcc";
     var pointLight = new THREE.PointLight(pointColor);
-    pointLight.distance = 100;
+    pointLight.distance = 50;
     scene.add(pointLight);
 
     var controls1 = new function () {
