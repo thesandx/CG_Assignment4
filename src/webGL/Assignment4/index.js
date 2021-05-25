@@ -949,6 +949,14 @@ if(controlObject!==undefined){
           child.material.needsUpdate = true;
         }
       });
+      params.target1.traverse(function (child) {
+        if (child instanceof THREE.Mesh) {
+
+          // apply texture
+          child.material.map = texture
+          child.material.needsUpdate = true;
+        }
+      });
 
     });
   }
